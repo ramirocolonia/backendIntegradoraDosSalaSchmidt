@@ -1,9 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import handlebars from "express-handlebars";
-import MongoStore from "connect-mongo";
 import cookieParser from "cookie-parser";
-import session from "express-session";
 import passport from "passport";
 
 import productsRouter from "./routes/products.router.js";
@@ -32,23 +30,6 @@ mongoose
     console.error("Error al conectarse a la base de datos", error);
     process.exit();
   });
-
-
-
-// app.use(
-//   session({
-//     store: MongoStore.create({
-//       mongoUrl: "mongodb+srv://ramiro:ramiro77@codercluster.smyhhqs.mongodb.net/ecommerce?retryWrites=true&w=majority",
-//       ttl:1000
-//     }),
-//     name: "ecommerce.sid",
-//     secret: "prueba",
-//     resave: false,
-//     saveUninitialized: false
-//   })
-// );
-
-// app.use(passport.session());
 
 app.use(express.json());
 app.use(cookieParser());

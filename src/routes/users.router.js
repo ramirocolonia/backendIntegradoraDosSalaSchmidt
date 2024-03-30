@@ -1,6 +1,7 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import UserManagerDB from "../dao/UserManagerDB.js";
+import { passportCall } from "../utils.js";
 
 const usersRouter = Router();
 
@@ -18,40 +19,20 @@ usersRouter.post("/login", async (req, res) => {
   try {
     const userManager = new UserManagerDB();
     const resp = await userManager.login(req.body);
-    const token = jwt.sign(resp.payload, "ecomSecret", { expiresIn: "24h" });
-    res.cookie("tokenUsrCookie", token, {
-      maxAge: 60 * 60 * 1000 * 24,
-      httpOnly: true,
-    });
-    resp.token = token;
-    console.log(resp);
+    if (resp.status === "success") {
+      const { first_name, last_name, email, rol } = resp.payload;
+      const token = jwt.sign({ first_name, last_name, email, rol }, "ecomSecret", { expiresIn: "24h" });
+      res.cookie("tokenUsrCookie", token, {maxAge: 60 * 60 * 1000 * 24, httpOnly: true});
+      resp.token = token;
+    }
     res.send(resp);
-  } catch (error) {}
+  } catch (error) {
+    res.send({ status: "error", message: "Error en ejecución, " + error });
+  }
 });
 
-// usersRouter.get("/faillogin", (req, res) => {
-//   console.log("FAIL LOGIN error en el login");
-//   res.send({ error: "FAIL LOGIN error en el login" });
-// });
-
-// // usersRouter.get("/login/github", passport.authenticate("github", {scope:["user: email"]}), async (req,res)=>{});
-
-// // usersRouter.get("/login/githubcbauth", passport.authenticate("github", {failureRedirect:"/login"}), async (req, res)=> {
-// //   req.session.user = {
-// //     name: req.user.email,
-// //     rol: req.user.rol
-// //   };
-// //   res.redirect("/products");
-// // });
-
-usersRouter.get("/logout", (req, res) => {
-  req.session.destroy((error) => {
-    if (!error) {
-      res.redirect("/login");
-    } else {
-      res.send({ status: "error", message: "Error en logout, " + error });
-    }
-  });
+usersRouter.get("/api/sessions/current", passportCall("jwt"), async (req, res)=>{
+  res.send(req.user);
 });
 
 export default usersRouter;

@@ -50,7 +50,7 @@ class UserManagerDB{
     }else{
       user = await userModel.findOne({ email: email });
       if(user){
-        if(isValidPassword(user, password)){          
+        if(isValidPassword(user, password)){  
           return {status:"success", payload: user};
         }else{
           return { status: "error", message: "Contraseña incorrecta" };  
